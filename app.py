@@ -98,7 +98,7 @@ def LLM_model(pdf_path, prompt):
         pages = loader.load_and_split()
         questions_dict = {}
         if pages != []:
-            embeddings = OpenAIEmbeddings(openai_api_key="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")
+            embeddings = OpenAIEmbeddings(openai_api_key="")
 
             vectordb = Chroma.from_documents(pages, embedding=embeddings, persist_directory=".")
             # vectordb persist()
