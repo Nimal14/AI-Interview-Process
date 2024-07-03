@@ -32,10 +32,10 @@ from io import BytesIO
 from datetime import datetime
 import json
 
-openai.api_key = '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'
+openai.api_key = ''
 GPT_MODEL = "gpt-4"
-candidate_name = "Iswarya"
-bot_name = "Jenny"
+candidate_name = ""
+bot_name = "Berry"
 
 write_txt = True
 
