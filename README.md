@@ -30,7 +30,7 @@ The automated interview process aims to streamline and enhance the initial phase
    - **Error Messages:** If there are issues with loading the PDF or interacting with the LLM, the system generates appropriate error messages.
    - **Question Output:** Successfully generated questions are structured into a dictionary format for further processing or display.
 
-6. **Interview Execution (Not Fully Covered in Provided Snippets)**
+6. **Interview Execution**
    - **Question Presentation:** The system presents the generated questions to the candidate, possibly using a combination of text and TTS.
    - **Response Collection:** The candidate's responses can be collected via text or voice input.
    - **Evaluation:** The system evaluates the responses based on predefined criteria and scoring metrics.
