@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Questionnaire</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: url('https://si.wsj.net/public/resources/images/B3-FF650_Interv_M_20191016131730.jpg') center/cover no-repeat;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #question-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            max-width: 600px; /* Adjust as needed */
+            width: 80%; /* Adjust as needed */
+            margin: auto; /* Center the container */
+        }
+        h1 {
+            color: #333;
+        }
+        #question-text {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        #answer-input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; /* Include padding in width */
+        }
+        #next-question-button {
+            background-color: #0074d9;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        #next-question-button:hover {
+            background-color: #0056b3;
+        }
+        #processing-message {
+            display: none;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        #video-feed {
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="question-container">
+        <h1>Answer the Questions</h1>
+        <p id="question-text"></p>
+        <input type="text" id="answer-input" placeholder="Your answer">
+        <button id="next-question-button">Next Question</button>
+        <p id="processing-message">Processing your results, please wait...</p>
+        <video id="video-feed" autoplay playsinline></video>
+    </div>
+<script>
+    var questions = {{ questions|tojson|safe }};
+    var currentQuestionIndex = 0;
+    var questionTextElement = document.getElementById('question-text');
+    var answerInput = document.getElementById('answer-input');
+    var nextQuestionButton = document.getElementById('next-question-button');
+    var processingMessage = document.getElementById('processing-message');
+    var videoFeed = document.getElementById('video-feed');
+    var answers = [];
+    var processing = false;
+
+    async function setupCamera() {
+        try {
+            // Check for camera permission
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            // Permission granted, display the video feed
+            videoFeed.srcObject = stream;
+        } catch (error) {
+            console.error('Error accessing the camera: ', error);
+            // If permission is denied or some other error occurs, handle it gracefully
+        }
+    }
+
+    function loadQuestion() {
+        if (currentQuestionIndex < questions.length) {
+            questionTextElement.innerHTML = questions[currentQuestionIndex];
+            answerInput.value = ''; // Clear the answer input
+            currentQuestionIndex++;
+        } else {
+            questionTextElement.innerHTML = 'The test has ended.';
+            answerInput.style.display = 'none';
+            nextQuestionButton.style.display = 'none';
+            processingMessage.style.display = 'block';
+            // Send the answers to the server and then redirect
+            sendAnswersToServer();
+        }
+    }
+
+    function handleKeyPress(event) {
+        if (event.keyCode === 13) {
+            nextQuestionButton.click();
+        }
+    }
+
+    function sendAnswersToServer() {
+        if (processing) return; // Do not allow multiple submissions
+        processing = true;
+
+        // Display the processing message
+        processingMessage.style.display = 'block';
+
+        // Make the submit_answers request
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/submit_answers', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send('answers[]=' + answers.join('&answers[]='));
+
+        // Listen for the request to complete
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Request is complete, redirect to the result page
+                window.location.href = 'result';
+            } else {
+                // Handle any errors
+                console.error('Request failed with status ' + xhr.status);
+            }
+        };
+    }
+
+    function displayAnswers(answers) {
+        // Display the answers as a list on the page
+        var answersList = document.createElement('ul');
+        answers.forEach(function (answer) {
+            var answerItem = document.createElement('li');
+            answerItem.textContent = answer;
+            answersList.appendChild(answerItem);
+        });
+        questionTextElement.parentNode.appendChild(answersList);
+    }
+
+    nextQuestionButton.addEventListener('click', function () {
+        answers.push(answerInput.value);
+        loadQuestion();
+    });
+
+    answerInput.addEventListener('keydown', handleKeyPress);
+    loadQuestion();
+    setupCamera(); // Setup the camera when the page loads
+</script>
+
+    <script>
+        const video = document.getElementById('video-feed');
+
+        // Attempt to get webcam stream
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(error => {
+                console.error('Error accessing webcam:', error);
+            });
+    </script>
+</body>
+</html>
+
